@@ -27,12 +27,12 @@ namespace MyFirstWpfApp
                 {"type", type.ToString()}
             };
             var content = new FormUrlEncodedContent(values);
-            return (await client.PostAsync($"{BACKEND_URL}/MoveWheels", content)).IsSuccessStatusCode;
+            return (await client.PostAsync($"{BACKEND_URL}/RaspPi/MoveWheels", content)).IsSuccessStatusCode;
         }
 
         public static async Task<bool> blink()
         {
-            return (await client.GetAsync($"{BACKEND_URL}/Blink")).IsSuccessStatusCode;
+            return (await client.GetAsync($"{BACKEND_URL}/RaspPi/Blink")).IsSuccessStatusCode;
         }
     }
 }
