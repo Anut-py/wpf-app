@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MyFirstWpfApp
+namespace RaspberryPiController
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -23,6 +25,10 @@ namespace MyFirstWpfApp
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void MainWindow_OnKeyDown(object sender, KeyEventArgs e)
+        {
         }
     }
 }
