@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -20,10 +21,10 @@ namespace RaspberryPiController
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        private double multiplier;
-        
+        private double _multiplier;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -34,44 +35,46 @@ namespace RaspberryPiController
             return Sensitivity.Value;
         }
 
-        private async void MainWindow_OnKeyDown(object sender, KeyEventArgs e)
+        private void MainWindow_OnKeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
                 case Key.W:
                     UpKey.Background = new SolidColorBrush(Color.FromRgb(225, 225, 255));
-                    await BackendConnector.Move(GetSensitivity(), MovementType.Forward);
+                    BackendConnector.Move(GetSensitivity(), MovementType.Forward);
                     break;
                 case Key.A:
                     LeftKey.Background = new SolidColorBrush(Color.FromRgb(225, 225, 255));
-                    await BackendConnector.Turn(GetSensitivity(), TurnType.Left);
-                    PositionDot.RenderTransform = new RotateTransform(90 - (await BackendConnector.GetPosition()).RotationDegrees);
+                    BackendConnector.Turn(GetSensitivity(), TurnType.Left);
+                    PositionDot.RenderTransform =
+                        new RotateTransform(BackendConnector.GetPosition().RotationDegrees);
                     break;
                 case Key.S:
                     DownKey.Background = new SolidColorBrush(Color.FromRgb(225, 225, 255));
-                    await BackendConnector.Move(GetSensitivity(), MovementType.Backward);
+                    BackendConnector.Move(GetSensitivity(), MovementType.Backward);
                     break;
                 case Key.D:
                     RightKey.Background = new SolidColorBrush(Color.FromRgb(225, 225, 255));
-                    await BackendConnector.Turn(GetSensitivity(), TurnType.Right);
-                    PositionDot.RenderTransform = new RotateTransform(90 - (await BackendConnector.GetPosition()).RotationDegrees);
+                    BackendConnector.Turn(GetSensitivity(), TurnType.Right);
+                    PositionDot.RenderTransform =
+                        new RotateTransform(BackendConnector.GetPosition().RotationDegrees);
                     break;
                 case Key.Space:
                     if (e.IsRepeat) break;
                     SpaceKey.Background = new SolidColorBrush(Color.FromRgb(225, 225, 255));
-                    await BackendConnector.Blink();
+                    BackendConnector.Blink();
                     break;
             }
 
-            var pos = await BackendConnector.GetPosition();
+            var pos = BackendConnector.GetPosition();
             PositionText.Text =
                 $"Position (x: {pos.XPos}, y: {pos.YPos}, rotation: {pos.RotationDegrees})";
 
-            var t = new Thickness((150 + pos.XPos) / multiplier, (110 - pos.YPos) / multiplier, 0, 0);
+            var t = new Thickness((150 + pos.XPos) / _multiplier, (110 - pos.YPos) / _multiplier, 0, 0);
             if (t.Left >= 300 || t.Left <= 0 || t.Top <= 0 || t.Top >= 220) PositionDot.Text = "";
             else PositionDot.Text = "^";
             PositionDot.Margin = t;
-            PositionDot.FontSize = 10 / multiplier;
+            PositionDot.FontSize = 10 / _multiplier;
             e.Handled = true;
         }
 
@@ -90,31 +93,31 @@ namespace RaspberryPiController
             SensitivityLabel.Text = "Sensitivity (" + e.NewValue + ")";
         }
 
-        private async void MainWindow_OnInitialized(object? sender, EventArgs e)
+        private void MainWindow_OnInitialized(object? sender, EventArgs e)
         {
-            await BackendConnector.Blink();
-            await BackendConnector.Blink();
-            await BackendConnector.Blink();
-            var pos = await BackendConnector.GetPosition();
-            multiplier = 1;
+            BackendConnector.Blink();
+            BackendConnector.Blink();
+            BackendConnector.Blink();
+            var pos = BackendConnector.GetPosition();
+            _multiplier = 1;
             PositionText.Text =
                 $"Position (x: {pos.XPos}, y: {pos.YPos}, rotation: {pos.RotationDegrees})";
             var t = new Thickness(150 + pos.XPos, 110 - pos.YPos, 0, 0);
             if (t.Left >= 300 || t.Left <= 0 || t.Top <= 0 || t.Top >= 220) PositionDot.Text = "";
             else PositionDot.Text = "^";
             PositionDot.Margin = t;
-            PositionDot.RenderTransform = new RotateTransform(90 - (await BackendConnector.GetPosition()).RotationDegrees);
+            PositionDot.RenderTransform = new RotateTransform(BackendConnector.GetPosition().RotationDegrees);
         }
 
-        private async void Zoom_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Zoom_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var pos = await BackendConnector.GetPosition();
-            multiplier = 1 / e.NewValue;
-            var t = new Thickness((150 + pos.XPos) / multiplier, (110 - pos.YPos) / multiplier, 0, 0);
+            var pos = BackendConnector.GetPosition();
+            _multiplier = 1 / e.NewValue;
+            var t = new Thickness((150 + pos.XPos) / _multiplier, (110 - pos.YPos) / _multiplier, 0, 0);
             if (t.Left >= 300 || t.Left <= 0 || t.Top <= 0 || t.Top >= 220) PositionDot.Text = "";
             else PositionDot.Text = "^";
             PositionDot.Margin = t;
-            PositionDot.FontSize = 10 / multiplier;
+            PositionDot.FontSize = 10 / _multiplier;
         }
     }
 }

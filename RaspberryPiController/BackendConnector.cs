@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RaspberryPiController
 {
@@ -27,9 +29,9 @@ namespace RaspberryPiController
             RotationDegrees = rotationDegrees;
         }
 
-        public double XPos { get; }
-        public double YPos { get; }
-        public double RotationDegrees { get; }
+        public double XPos { get; set; }
+        public double YPos { get; set; }
+        public double RotationDegrees { get; set; }
     }
 
     public static class BackendConnector
@@ -38,73 +40,54 @@ namespace RaspberryPiController
         private const string RemoteUrl = "";
         private const string BackendUrl = LocalUrl;
         private static readonly HttpClient Client = new HttpClient();
-        private static Position previous { get; set; }
+        private static Position current { get; } = new Position(0, 0, 0);
+        private static bool blinking { get; set; } = false;
         
-        public static async Task<bool> Move(double amount, MovementType type)
+        public static void Move(double amount, MovementType type)
         {
-            try
+            amount = Math.Round(amount, 2);
+            if (type == MovementType.Forward)
             {
-                var values = new Dictionary<string, string>
-                {
-                    {"amount", amount.ToString()},
-                    {"type", type.ToString()}
-                };
-                var content = new FormUrlEncodedContent(values);
-                return (await Client.PostAsync($"{BackendUrl}/RaspPi/Move", content)).IsSuccessStatusCode;
+                current.XPos += Math.Sin((Math.PI / 180) * current.RotationDegrees) * amount;
+                current.YPos += Math.Cos((Math.PI / 180) * current.RotationDegrees) * amount;
             }
-            catch (Exception)
+            else
             {
-                return false;
+                current.XPos -= Math.Sin((Math.PI / 180) * current.RotationDegrees) * amount;
+                current.YPos -= Math.Cos((Math.PI / 180) * current.RotationDegrees) * amount;
             }
         }
 
-        public static async Task<bool> Turn(double amount, TurnType type)
+        public static void Turn(double amount, TurnType type)
         {
-            try
-            {
-                var values = new Dictionary<string, string>
-                {
-                    {"amount", amount.ToString()},
-                    {"type", type.ToString()}
-                };
-                var content = new FormUrlEncodedContent(values);
-                return (await Client.PostAsync($"{BackendUrl}/RaspPi/Turn", content)).IsSuccessStatusCode;
-            }
-            catch (Exception)
-            {
-                return false;
+            amount = Math.Round(amount, 2);
+            if (type == TurnType.Right) {
+                current.RotationDegrees += amount;
+                if (current.RotationDegrees >= 360) current.RotationDegrees -= 360;
+            } else {
+                current.RotationDegrees -= amount;
+                if (current.RotationDegrees <= -360) current.RotationDegrees += 360;
             }
         }
 
-        public static async Task<bool> Blink()
+        public static void Blink()
         {
-            try
+            blinking = true;
+            new Thread(() =>
             {
-                return (await Client.PostAsync($"{BackendUrl}/RaspPi/Blink", null)).IsSuccessStatusCode;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+                Thread.Sleep(1500);
+                blinking = false;
+            }).Start();
         }
 
-        public static async Task<Position> GetPosition()
+        public static bool IsBlinking()
         {
-            try
-            {
-                previous = new Position(
-                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/XPos")).Content
-                        .ReadAsStringAsync()),
-                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/YPos")).Content
-                        .ReadAsStringAsync()),
-                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/Rotation")).Content
-                        .ReadAsStringAsync()));
-                return previous;
-            }
-            catch (Exception)
-            {
-                return previous;
-            }
+            return blinking;
+        }
+
+        public static Position GetPosition()
+        {
+            return current;
         }
     }
 }
