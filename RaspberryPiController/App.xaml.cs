@@ -17,8 +17,10 @@ namespace RaspberryPiController
         private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             MessageBox.Show("Internal error: " + e.Exception.Message +
-                            ". You can continue to use the application, but it may not work properly.", "Error",
+                            " You can continue to use the application, but it may not work properly.", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
+            Console.WriteLine(e.Exception.Message);
+            Console.WriteLine(e.Exception.StackTrace);
             e.Handled = true;
         }
     }

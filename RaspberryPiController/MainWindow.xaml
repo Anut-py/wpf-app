@@ -5,11 +5,73 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RaspberryPiController"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Icon="http://clipart-library.com/images/pT5ra4Xgc.jpg"
-        WindowStartupLocation="CenterScreen" KeyDown="MainWindow_OnKeyDown">
+        Title="Robot Controller" Height="600" Width="1000"
+        Icon="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN.png"
+        WindowStartupLocation="CenterScreen" PreviewKeyDown="MainWindow_OnKeyDown" PreviewKeyUp="MainWindow_OnKeyUp"
+        Initialized="MainWindow_OnInitialized">
+    <Window.Resources>
+        <Style x:Key="Key" TargetType="{x:Type Border}">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Black" />
+        </Style>
+    </Window.Resources>
     <Grid>
-        <TextBlock VerticalAlignment="Center"
-                   HorizontalAlignment="Center" FontSize="72">Hello world!</TextBlock>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3" Name="SensitivityLabel">Sensitivity (1.0)</TextBlock>
+        <Slider Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Minimum="0.5" Maximum="5" Name="Sensitivity" Value="1"
+                ValueChanged="Sensitivity_OnValueChanged" />
+        <Border Grid.Column="2" Grid.Row="3" Style="{StaticResource Key}" Margin="10" Name="UpKey">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">W</TextBlock>
+        </Border>
+        <Border Grid.Column="1" Grid.Row="4" Style="{StaticResource Key}" Margin="10" Name="LeftKey">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">A</TextBlock>
+        </Border>
+        <Border Grid.Column="2" Grid.Row="4" Margin="10" Name="DownKey" Style="{StaticResource Key}">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">S</TextBlock>
+        </Border>
+        <Border Style="{StaticResource Key}" Grid.Column="3" Grid.Row="4" Margin="10" Name="RightKey">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">D</TextBlock>
+        </Border>
+        <Border Style="{StaticResource Key}" Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="3" Margin="10"
+                Name="SpaceKey">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
+                Space
+            </TextBlock>
+        </Border>
+        <TextBlock Grid.Column="1" Grid.Row="6" TextWrapping="Wrap" Grid.ColumnSpan="2">
+            Use the W, A, S, and D keys to control the robot, and press space to make the robot blink.
+        </TextBlock>
+        <TextBlock Name="PositionText" Grid.Column="5" Grid.Row="1" Grid.ColumnSpan="2">Position (x: 0, y: 0, rotation: 0)</TextBlock>
+        <Border Grid.Column="5" Grid.Row="2" Style="{StaticResource Key}" Grid.RowSpan="3">
+            <TextBlock Name="PositionDot" FontSize="10">^</TextBlock>
+        </Border>
+        <Grid Grid.Column="5" Grid.Row="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="20" />
+            </Grid.RowDefinitions>
+            <Slider VerticalAlignment="Top" Name="Zoom" Minimum="0.5" Maximum="10" Value="1"
+                    ValueChanged="Zoom_OnValueChanged" />
+            <TextBlock Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Center">Zoom</TextBlock>
+        </Grid>
     </Grid>
 </Window>

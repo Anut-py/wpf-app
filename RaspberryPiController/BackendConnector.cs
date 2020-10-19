@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace RaspberryPiController
@@ -17,14 +18,29 @@ namespace RaspberryPiController
         Right
     }
 
-    public class BackendConnector
+    public class Position
+    {
+        public Position(double xPos, double yPos, double rotationDegrees)
+        {
+            XPos = xPos;
+            YPos = yPos;
+            RotationDegrees = rotationDegrees;
+        }
+
+        public double XPos { get; }
+        public double YPos { get; }
+        public double RotationDegrees { get; }
+    }
+
+    public static class BackendConnector
     {
         private const string LocalUrl = "http://localhost:9876";
         private const string RemoteUrl = "";
         private const string BackendUrl = LocalUrl;
         private static readonly HttpClient Client = new HttpClient();
-
-        public static async Task<bool> Move(int amount, MovementType type)
+        private static Position previous { get; set; }
+        
+        public static async Task<bool> Move(double amount, MovementType type)
         {
             try
             {
@@ -36,13 +52,13 @@ namespace RaspberryPiController
                 var content = new FormUrlEncodedContent(values);
                 return (await Client.PostAsync($"{BackendUrl}/RaspPi/Move", content)).IsSuccessStatusCode;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
         }
 
-        public static async Task<bool> Turn(int amount, TurnType type)
+        public static async Task<bool> Turn(double amount, TurnType type)
         {
             try
             {
@@ -54,7 +70,7 @@ namespace RaspberryPiController
                 var content = new FormUrlEncodedContent(values);
                 return (await Client.PostAsync($"{BackendUrl}/RaspPi/Turn", content)).IsSuccessStatusCode;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
@@ -64,11 +80,30 @@ namespace RaspberryPiController
         {
             try
             {
-                return (await Client.GetAsync($"{BackendUrl}/RaspPi/Blink")).IsSuccessStatusCode;
+                return (await Client.PostAsync($"{BackendUrl}/RaspPi/Blink", null)).IsSuccessStatusCode;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
+            }
+        }
+
+        public static async Task<Position> GetPosition()
+        {
+            try
+            {
+                previous = new Position(
+                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/XPos")).Content
+                        .ReadAsStringAsync()),
+                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/YPos")).Content
+                        .ReadAsStringAsync()),
+                    Convert.ToDouble(await (await Client.GetAsync($"{BackendUrl}/RaspPi/Position/Rotation")).Content
+                        .ReadAsStringAsync()));
+                return previous;
+            }
+            catch (Exception)
+            {
+                return previous;
             }
         }
     }
