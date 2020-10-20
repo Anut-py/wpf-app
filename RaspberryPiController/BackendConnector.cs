@@ -41,7 +41,6 @@ namespace RaspberryPiController
         private const string BackendUrl = LocalUrl;
         private static readonly HttpClient Client = new HttpClient();
         private static Position current { get; } = new Position(0, 0, 0);
-        private static bool blinking { get; set; } = false;
         
         public static void Move(double amount, MovementType type)
         {
@@ -72,17 +71,7 @@ namespace RaspberryPiController
 
         public static void Blink()
         {
-            blinking = true;
-            new Thread(() =>
-            {
-                Thread.Sleep(1500);
-                blinking = false;
-            }).Start();
-        }
-
-        public static bool IsBlinking()
-        {
-            return blinking;
+            Console.Beep();
         }
 
         public static Position GetPosition()
